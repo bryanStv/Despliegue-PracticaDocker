@@ -1,0 +1,106 @@
+FROM: Es la primera línea y define la imagen base. Toda imagen Docker parte de una base (por ejemplo, Debian, Ubuntu, Alpine), y puede incluir una versión específica (debian:latest para la última versión o debian:buster para una versión específica).
+
+RUN: Ejecuta comandos dentro de la imagen para instalar o configurar elementos necesarios para la aplicación. Este paso es comúnmente usado para:
+
+    Instalar aplicaciones o dependencias (RUN apt-get install -y nginx).
+    Configurar archivos (RUN echo 'Hola' > /etc/hola.txt).
+    Descargar o actualizar paquetes (RUN apt-get update).
+
+COPY: Mueve archivos o carpetas desde el host al contenedor, especificando primero el origen y luego el destino. Es fundamental para copiar código, archivos de configuración o assets de tu aplicación.
+
+EXPOSE: Define el puerto en el que la aplicación escucha dentro del contenedor. Sin embargo, para acceder a este puerto desde el host, necesitarás especificarlo con -p en la línea de comandos, por ejemplo:
+
+bash
+
+    docker run -p 8080:80 nombre_imagen
+
+    CMD: Define el comando principal para arrancar la aplicación. Sólo se ejecuta cuando el contenedor se lanza y no es reemplazado. En este caso, el CMD ejecuta Nginx.
+
+Ejecución del Dockerfile
+
+Para construir y ejecutar esta imagen:
+
+    Construir la imagen:
+
+    bash
+
+docker build -t nombre_imagen .
+
+Ejecutar el contenedor:
+
+bash
+
+    docker run -d -p 8080:80 nombre_imagen
+
+        -d ejecuta el contenedor en segundo plano.
+        -p 8080:80 enlaza el puerto 8080 del host al puerto 80 del contenedor.
+
+Este resumen cubre los fundamentos y las instrucciones más frecuentes de Dockerfile, con las que podrás enfrentar preguntas prácticas como:
+
+    ¿Qué hace FROM?
+    ¿Cómo instalas dependencias?
+    ¿Cómo copiar archivos?
+    ¿Qué hace EXPOSE?
+    ¿Diferencia entre RUN y CMD?
+
+La instrucción CMD en Docker define el comando y los argumentos que se ejecutarán cuando un contenedor se inicie a partir de la imagen. Solo puedes tener una instrucción CMD en el Dockerfile activo, y se ejecuta en tiempo de ejecución del contenedor, no durante la construcción de la imagen (a diferencia de RUN).
+Formatos de CMD
+
+    Forma de lista o array:
+        Esta es la forma recomendada para CMD porque no pasa por el shell, lo cual evita problemas de interpretación de espacios y caracteres especiales.
+        Ejemplo:
+
+        dockerfile
+
+    CMD ["nginx", "-g", "daemon off;"]
+
+    Aquí, el contenedor ejecutará nginx con los argumentos -g daemon off;.
+
+Forma de cadena:
+
+    Usa el formato de cadena como un solo argumento. La cadena pasa por el shell, así que debes estar atento a posibles problemas de interpretación.
+    Ejemplo:
+
+    dockerfile
+
+    CMD nginx -g 'daemon off;'
+
+    Aquí el comando se ejecuta como sh -c "nginx -g 'daemon off;'".
+
+Como predeterminados con ENTRYPOINT:
+
+    CMD se puede usar junto con ENTRYPOINT. En este caso, CMD proporciona argumentos adicionales al comando especificado en ENTRYPOINT.
+    Ejemplo:
+
+    dockerfile
+
+        ENTRYPOINT ["python"]
+        CMD ["app.py"]
+
+        Esto ejecutará python app.py al iniciar el contenedor.
+
+Cosas que puedes hacer con CMD
+
+    Ejecutar un proceso principal: Como un servidor web, una aplicación en Node.js o un proceso en Python.
+        Ejemplo: CMD ["node", "app.js"]
+
+    Argumentos predeterminados para ENTRYPOINT: Define valores predeterminados que pueden ser reemplazados cuando se ejecuta docker run.
+        Ejemplo:
+
+        dockerfile
+
+    ENTRYPOINT ["curl"]
+    CMD ["https://openai.com"]
+
+Iniciar scripts de shell: Puedes iniciar scripts de shell que inicien varias aplicaciones o configuraciones.
+
+    Ejemplo: CMD ["sh", "/usr/local/bin/startup.sh"]
+
+Utilizar variables de entorno: Puedes hacer que CMD lea y use variables de entorno definidas en el Dockerfile o en el comando docker run.
+
+    Ejemplo:
+
+    dockerfile
+
+ENV PORT 8080
+CMD ["node", "server.js", "$PORT"]

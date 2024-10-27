@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  joomla:
+    image: joomla:latest
+    ports:
+      - "8080:80"
+    environment:
+      JOOMLA_DB_HOST: db
+      JOOMLA_DB_USER: joomla
+      JOOMLA_DB_PASSWORD: joomlapass
+      JOOMLA_DB_NAME: joomla
+    volumes:
+      - joomla_data:/var/www/html
+    command: /bin/sh -c "chown -R www-data:www-data /var/www/html && apache2-foreground"
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: joomla
+      MYSQL_USER: joomla
+      MYSQL_PASSWORD: joomlapass
+    volumes:
+      - db_data:/var/lib/mysql
+    command: /bin/sh -c "chown -R mysql:mysql /var/lib/mysql && docker-entrypoint.sh mysqld"
+
+volumes:
+  joomla_data:
+  db_data:
